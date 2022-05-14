@@ -1,8 +1,8 @@
 public class Main {
-
     public static void main(String[] args) {
         // write your code here
-        CMDInterface usersInterface = new CMDInterface();
+        // enter
+        CMDInterface usersInterface = new CMDInterface("C:\\Java\\NewAlgh\\src\\main\\java\\tasks\\tasks.json");
         usersInterface.startMenu();
     }
 }

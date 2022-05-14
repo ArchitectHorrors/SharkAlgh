@@ -8,8 +8,12 @@ import java.util.Optional;
 
 public class TaskRepository {
     private final ObjectMapper mapper = new ObjectMapper();
-    private final String PATH = "C:\\Java\\NewAlgh\\src\\main\\java\\tasks\\tasks.json";
+    private final String PATH;
     private List<Task> tasks = new ArrayList<>();
+
+    public TaskRepository(final String path){
+        PATH = path;
+    }
 
     public boolean create(Task task) {
         assignTasks();

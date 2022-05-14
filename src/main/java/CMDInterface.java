@@ -5,9 +5,13 @@ import java.util.List;
 import java.util.Scanner;
 
 public class CMDInterface {
-    private final TaskRepository repository = new TaskRepository();
+    private final TaskRepository repository;
     private final SecureRandom random = new SecureRandom();
     Scanner scanner = new Scanner(System.in);
+
+    CMDInterface(final String path){
+        repository = new TaskRepository(path);
+    }
 
     void startMenu() {
         Action.CHOICE choice;
