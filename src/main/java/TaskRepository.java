@@ -1,80 +1,90 @@
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.*;
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-@SuppressWarnings("unchecked")
 public class TaskRepository {
-    boolean addTask(Task task) {
-        JSONObject objectDetails = new JSONObject();
-        objectDetails.put("Id", task.getId());
-        objectDetails.put("name", task.getName());
-        objectDetails.put("priority", task.getPriority().toString());
-        objectDetails.put("daysRemaining", task.getDaysRemaining());
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final String PATH = "C:\\Java\\NewAlgh\\src\\main\\java\\tasks\\tasks.json";
+    private List<Task> tasks = new ArrayList<>();
 
-        JSONObject object = new JSONObject();
-        object.put("task", objectDetails);
-
-        return saveInFile(object);
+    public boolean create(Task task) {
+        assignTasks();
+        tasks.add(task);
+        return save();
     }
 
-    void readTasks() {
+    List<Task> read() {
+        return assignTasks() ? this.tasks : new ArrayList<>();
     }
 
-    private boolean saveInFile(JSONObject object) {
-        final String PATH = "C:\\Java\\NewAlgh\\src\\main\\java\\tasks\\tasks.txt";
-        JSONParser jsonParser = new JSONParser();
-        List<Task> taskList = new ArrayList<>();
-        JSONArray tasks = new JSONArray();
+    public Task get(int id){
+        assignTasks();
+        Optional<Task> first = tasks.stream().filter(task -> task.getId() == id).findFirst();
+        return first.orElseGet(Task::new);
+    }
 
-        try (FileWriter writer = new FileWriter(PATH);
-             FileReader reader = new FileReader(PATH);
-             BufferedReader br = new BufferedReader(reader)) {
-            boolean ready = br.ready();
-            String line = br.readLine();
-            if (ready && line == null) {
-                tasks.add(object);
-                writer.write(tasks.toJSONString());
-                writer.flush();
-                return true;
-            }
-            //Read JSON file (task list)
-            Object obj = jsonParser.parse(reader);
-            tasks = (JSONArray) obj;
-
-//            for (Object task : tasks) {
-//                //cast to Task type
-//                taskList.add(parseTaskObject((JSONObject) task));
-//            }
-
-            tasks.add(object);
-            writer.write(tasks.toJSONString());
-            writer.flush();
-            return true;
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
+    public void editName(int id, String newName){
+        Optional<Task> first = tasks.stream().filter(task -> task.getId() == id).findFirst();
+        if (first.isPresent()){
+            Task task = first.get();
+            task.setName(newName);
+            save();
         }
-        return false;
     }
 
-    /**
-     * Parses object read from file to {@link Task} object
-     *
-     * @param object object to be parsed
-     * @return new Task object
-     */
-    private static Task parseTaskObject(JSONObject object) {
-        JSONObject taskObject = (JSONObject) object.get("task");
+    public void editDaysRemaining(int id, int newDays){
+        Optional<Task> first = tasks.stream().filter(task -> task.getId() == id).findFirst();
+        if (first.isPresent()){
+            Task task = first.get();
+            int index = tasks.indexOf(task);
+            task.setDaysRemaining(newDays);
+            tasks.add(index, task);
+            save();
+        }
+    }
 
-        int Id = (int) taskObject.get("Id");
-        String name = (String) taskObject.get("name");
-        Priority priority = (Priority) taskObject.get("priority");
-        int daysRemaining = (int) taskObject.get("daysRemaining");
+    public void editPriority(int id, Priority newPriority){
+        Optional<Task> first = tasks.stream().filter(task -> task.getId() == id).findFirst();
+        if (first.isPresent()){
+            Task task = first.get();
+            int index = tasks.indexOf(task);
+            task.setPriority(newPriority);
+            tasks.add(index, task);
+            save();
+        }
+    }
 
-        return new Task(Id, name, priority, daysRemaining);
+    public void delete(int id){
+        List<Task> read = read();
+        if (!read.isEmpty()){
+            this.tasks.removeIf(task -> task.getId() == id);
+            save();
+        }
+    }
+
+    private boolean save(){
+        try {
+            mapper.writeValue(Paths.get(PATH).toFile(), tasks);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private boolean assignTasks() {
+        try {
+            this.tasks = mapper.readValue(
+                    new File(PATH),
+                    mapper.getTypeFactory().constructCollectionType(List.class, Task.class)
+            );
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 }
