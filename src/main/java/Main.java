@@ -1,7 +1,7 @@
 public class Main {
     public static void main(String[] args) {
         // write your code here
-        // enter
+        // enter your path to file
         CMDInterface usersInterface = new CMDInterface("C:\\Java\\NewAlgh\\src\\main\\java\\tasks\\tasks.json");
         usersInterface.startMenu();
     }
@@ -11,3 +11,4 @@ public class Main {
  * Podgląd zadań z pliku .txt
  * Edytowanie zadań znajdujących się w pliku .txt
  */
+

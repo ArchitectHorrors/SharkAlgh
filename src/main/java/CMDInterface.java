@@ -1,3 +1,4 @@
+import jdk.swing.interop.SwingInterOpUtils;
 import lombok.SneakyThrows;
 
 import java.security.SecureRandom;
@@ -5,9 +6,11 @@ import java.util.List;
 import java.util.Scanner;
 
 public class CMDInterface {
+    private final static String BAR = "|-----------------|-----------------|-----------------|-----------------|";
+    private final static String HEADER = "| %15s | %15s | %15s | %15s |%n";
     private final TaskRepository repository;
     private final SecureRandom random = new SecureRandom();
-    Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
 
     CMDInterface(final String path){
         repository = new TaskRepository(path);
@@ -23,6 +26,7 @@ public class CMDInterface {
                     2. View available tasks.
                     3. Edit task.
                     4. Delete task.
+                    5. Use algorithm to view tasks. 
                     0. Close program.
                     """);
             choice = Action.CHOICE.intValueOf(scanner.nextInt());
@@ -85,8 +89,11 @@ public class CMDInterface {
 
     private void showTasks() {
         List<Task> readTasks = repository.read();
+        System.out.format(HEADER, "ID", "NAME", "PRIORITY", "DAYS REMAINING");
+        System.out.println(BAR);
         for (Task task : readTasks) {
-            System.out.println(task + "\n");
+            System.out.printf("| %15s | %15s | %15s | %10s days |%n", task.getId(), task.getName(), task.getPriority(), task.getDaysRemaining());
+            System.out.println(BAR);
         }
     }
 
